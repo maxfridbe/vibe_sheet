@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vibe Sheet Example</title>
+</head>
+<body>
+    <div id="root" style="height: 100vh;"></div>
+
+    <!-- 1. Load React and ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+    <!-- 2. Load the Vibe Sheet library -->
+    <script src="vibe-sheet.js"></script>
+
+    <!-- 3. Render the Spreadsheet component -->
+    <script>
+        const App = () => {
+            return React.createElement('div', { style: { height: '100%' } },
+                React.createElement(VibeSheet.Spreadsheet)
+            );
+        };
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(React.createElement(App));
+    </script>
+</body>
+</html>

@@ -1,11 +1,13 @@
-const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
 
 module.exports = {
-  entry: './index.tsx', // Our entry point for the React app
+  entry: './vibesheet/index.ts',
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'bundle.js',
+    filename: 'vibe-sheet.js',
+    library: 'VibeSheet',
+    libraryTarget: 'umd',
+    globalObject: 'this',
   },
   resolve: {
     extensions: ['.ts', '.tsx', '.js', '.jsx'],
@@ -23,16 +25,8 @@ module.exports = {
       },
     ],
   },
-  plugins: [
-    new HtmlWebpackPlugin({
-      template: './index.html', // Path to your index.html file
-    }),
-  ],
-  devServer: {
-    static: {
-      directory: path.join(__dirname, 'dist'),
-    },
-    compress: true,
-    port: 9000,
-  },
+  externals: {
+    'react': 'react',
+    'react-dom': 'react-dom'
+  }
 };

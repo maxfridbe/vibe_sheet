@@ -21,8 +21,6 @@
     "declarationDir": "dist"
   },
   "include": [
-    "vibesheet/**/*",
-    "app.tsx",
-    "index.tsx"
+    "vibesheet/**/*"
   ]
 }

@@ -2,15 +2,16 @@
   "name": "vibe-sheet",
   "version": "1.0.0",
   "description": "A spreadsheet library.",
-  "main": "dist/bundle.js",
+  "main": "dist/vibe-sheet.js",
+  "types": "dist/vibe-sheet.d.ts",
   "scripts": {
-    "build": "webpack --mode production",
-    "build:types": "tsc && cat dist/vibesheet/*.d.ts > dist/vibe-sheet.d.ts && rm -rf dist/vibesheet dist/app.d.ts dist/index.d.ts"
+    "build": "rm -rf dist && webpack --mode production && npm run build:types && cp example/index.html dist/index.html",
+    "build:types": "tsc && cat dist/*.d.ts > dist/vibe-sheet.d.ts && find dist -name '*.d.ts' -not -name 'vibe-sheet.d.ts' -delete"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "dependencies": {
+  "peerDependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
