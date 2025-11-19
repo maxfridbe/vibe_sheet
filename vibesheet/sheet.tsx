@@ -329,7 +329,7 @@ const Grid = () => {
             gridRef.current?.focus();
             return;
         }
-        if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
+        if (!editMode && e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
             e.preventDefault();
             editingCellRef.current = activeCell;
             setEditMode(true);

@@ -1,3 +1,4 @@
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const path = require('path');
 
 module.exports = {
@@ -9,6 +10,7 @@ module.exports = {
     libraryTarget: 'umd',
     globalObject: 'this',
   },
+  plugins: [new MiniCssExtractPlugin({ filename: 'vibe-sheet.css' })],
   resolve: {
     extensions: ['.ts', '.tsx', '.js', '.jsx'],
   },
@@ -21,7 +23,7 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        use: ['style-loader', 'css-loader', 'postcss-loader'],
+        use: [MiniCssExtractPlugin.loader, 'css-loader', 'postcss-loader'],
       },
     ],
   },
