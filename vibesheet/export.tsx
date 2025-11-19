@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { CellMap, CellStyle, CellData } from './types';
-import { getEffectiveGridSize, getGridData as getGridDataUtil, formatCellValue, getCellId, copyToClipboard } from './utils';
+import { getEffectiveGridSize, formatCellValue, getCellId, copyToClipboard } from './utils';
 import { Icon, TableIcon, FileTextIcon, FileSpreadsheetIcon, DownloadIcon, CopyIcon, XIcon, EyeIcon } from './ui';
 
 export const getGridData = (cells: CellMap): string[][] => {

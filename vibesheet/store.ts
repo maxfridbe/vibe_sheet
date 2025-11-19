@@ -23,7 +23,9 @@ export class SpreadsheetStore {
 
   public subscribe = (listener: (s: SheetState) => void) => {
     this.listeners.add(listener);
-    return () => this.listeners.delete(listener);
+    return () => {
+      this.listeners.delete(listener);
+    };
   };
 
   public replayLog = (log: any[]) => {

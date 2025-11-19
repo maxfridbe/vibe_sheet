@@ -4,7 +4,8 @@
   "description": "A spreadsheet library.",
   "main": "dist/bundle.js",
   "scripts": {
-    "build": "webpack --mode production"
+    "build": "webpack --mode production",
+    "build:types": "tsc && cat dist/vibesheet/*.d.ts > dist/vibe-sheet.d.ts && rm -rf dist/vibesheet dist/app.d.ts dist/index.d.ts"
   },
   "keywords": [],
   "author": "",
