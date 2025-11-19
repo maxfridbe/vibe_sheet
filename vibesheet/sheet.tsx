@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo, forwardRef, useImperativeHandle } from 'react';
+import '../index.css';
 import { ActionType, CellData, CellStyle, SpreadsheetRef, SpreadsheetProps, CellMap } from './types';
 import { useStore, useStoreSelector, StoreContext, SpreadsheetStore } from './store';
 import { getCellId, parseCellId, formatCellValue } from './utils';
