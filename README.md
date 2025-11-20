@@ -1,3 +1,5 @@
+# TRY NOW: [Vibe Sheet Live Demo](https://maxfridbe.github.io/vibe_sheet/dist/)
+
 # Vibe Sheet
 
 Vibe Sheet is a customizable and interactive spreadsheet library built with React and TypeScript. It provides core spreadsheet functionalities, including cell editing, formula evaluation, styling, and data import/export capabilities.
