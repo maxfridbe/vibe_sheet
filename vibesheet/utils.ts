@@ -1,4 +1,4 @@
-import { CellData, CellMap, CellPos } from './types';
+import { ActionType, CellData, CellMap, CellPos } from './types';
 
 export const DEFAULT_COLS = 26;
 export const DEFAULT_ROWS = 50;
@@ -45,6 +45,45 @@ export const reevaluate = (cells: CellMap): CellMap => {
   return next;
 };
 
+export const updateFormulas = (cells: CellMap, action: ActionType, index: number, count: number = 1): CellMap => {
+    const newCells: CellMap = {};
+
+    Object.keys(cells).forEach(cellId => {
+        const cell = cells[cellId];
+        if (typeof cell.value === 'string' && cell.value.startsWith('=')) {
+            const newFormula = cell.value.replace(/(\$?)([A-Z]+)(\$?)([0-9]+)/g, (match, colAbs, col, rowAbs, rowStr) => {
+                const row = parseInt(rowStr, 10) - 1;
+                const pos = parseCellId(col + rowStr);
+                if (!pos) return match;
+                let { c } = pos;
+
+                let newRow = row;
+                let newCol = c;
+
+                if (action === ActionType.INSERT_ROW && !rowAbs && row >= index) {
+                    newRow += count;
+                } else if (action === ActionType.DELETE_ROW && !rowAbs && row > index) {
+                    newRow -= count;
+                } else if (action === ActionType.INSERT_COL && !colAbs && c >= index) {
+                    newCol += count;
+                } else if (action === ActionType.DELETE_COL && !colAbs && c > index) {
+                    newCol -= count;
+                }
+                
+                if (action === ActionType.DELETE_ROW && row === index) return '#REF!';
+                if (action === ActionType.DELETE_COL && c === index) return '#REF!';
+
+                return `${colAbs}${getColLabel(newCol)}${rowAbs}${newRow + 1}`;
+            });
+            newCells[cellId] = { ...cell, value: newFormula };
+        } else {
+            newCells[cellId] = cell;
+        }
+    });
+
+    return newCells;
+};
+
 export const copyToClipboard = (text: string) => {
   const textArea = document.createElement("textarea");
   textArea.value = text;
@@ -87,3 +126,4 @@ export const formatCellValue = (cell?: CellData): string => {
   }
   return val.toString();
 };
+

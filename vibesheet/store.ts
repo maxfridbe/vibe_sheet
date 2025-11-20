@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { ActionType, SheetState, CellMap, CellPos } from './types';
-import { reevaluate, parseCellId, getCellId, DEFAULT_COLS, DEFAULT_ROWS } from './utils';
+import { reevaluate, parseCellId, getCellId, DEFAULT_COLS, DEFAULT_ROWS, updateFormulas } from './utils';
 
 export class SpreadsheetStore {
   private state: SheetState;
@@ -184,46 +184,50 @@ export class SpreadsheetStore {
       case ActionType.RESIZE_ROW: s.rowHeights = { ...s.rowHeights, [p.index]: p.height }; break;
       case ActionType.INSERT_ROW:
         {
+            const updatedFormulas = updateFormulas(s.cells, action.type, p.index);
             const nc: CellMap = {};
-            Object.keys(s.cells).forEach(k => {
+            Object.keys(updatedFormulas).forEach(k => {
                 const pos = parseCellId(k); if(!pos) return;
-                if(pos.r >= p.index) nc[getCellId(pos.c, pos.r + 1)] = s.cells[k];
-                else nc[k] = s.cells[k];
+                if(pos.r >= p.index) nc[getCellId(pos.c, pos.r + 1)] = updatedFormulas[k];
+                else nc[k] = updatedFormulas[k];
             });
             s.cells = reevaluate(nc); s.rowCount++;
         }
         break;
       case ActionType.DELETE_ROW:
         {
+            const updatedFormulas = updateFormulas(s.cells, action.type, p.index);
             const nc: CellMap = {};
-            Object.keys(s.cells).forEach(k => {
+            Object.keys(updatedFormulas).forEach(k => {
                 const pos = parseCellId(k); if(!pos) return;
                 if(pos.r === p.index) return;
-                if(pos.r > p.index) nc[getCellId(pos.c, pos.r - 1)] = s.cells[k];
-                else nc[k] = s.cells[k];
+                if(pos.r > p.index) nc[getCellId(pos.c, pos.r - 1)] = updatedFormulas[k];
+                else nc[k] = updatedFormulas[k];
             });
             s.cells = reevaluate(nc); s.rowCount = Math.max(1, s.rowCount - 1);
         }
         break;
       case ActionType.INSERT_COL:
         {
+            const updatedFormulas = updateFormulas(s.cells, action.type, p.index);
             const nc: CellMap = {};
-            Object.keys(s.cells).forEach(k => {
+            Object.keys(updatedFormulas).forEach(k => {
                 const pos = parseCellId(k); if(!pos) return;
-                if(pos.c >= p.index) nc[getCellId(pos.c + 1, pos.r)] = s.cells[k];
-                else nc[k] = s.cells[k];
+                if(pos.c >= p.index) nc[getCellId(pos.c + 1, pos.r)] = updatedFormulas[k];
+                else nc[k] = updatedFormulas[k];
             });
             s.cells = reevaluate(nc); s.colCount++;
         }
         break;
       case ActionType.DELETE_COL:
         {
+            const updatedFormulas = updateFormulas(s.cells, action.type, p.index);
             const nc: CellMap = {};
-            Object.keys(s.cells).forEach(k => {
+            Object.keys(updatedFormulas).forEach(k => {
                 const pos = parseCellId(k); if(!pos) return;
                 if(pos.c === p.index) return;
-                if(pos.c > p.index) nc[getCellId(pos.c - 1, pos.r)] = s.cells[k];
-                else nc[k] = s.cells[k];
+                if(pos.c > p.index) nc[getCellId(pos.c - 1, pos.r)] = updatedFormulas[k];
+                else nc[k] = updatedFormulas[k];
             });
             s.cells = reevaluate(nc); s.colCount = Math.max(1, s.colCount - 1);
         }

@@ -160,7 +160,7 @@ export declare const PlusIcon: (p: any) => import("react/jsx-runtime").JSX.Eleme
 export declare const BorderIcon: ({ type }: {
     type: "left" | "right" | "top" | "bottom";
 }) => import("react/jsx-runtime").JSX.Element;
-import { CellData, CellMap, CellPos } from './types';
+import { ActionType, CellData, CellMap, CellPos } from './types';
 export declare const DEFAULT_COLS = 26;
 export declare const DEFAULT_ROWS = 50;
 export declare const getColLabel: (index: number) => string;
@@ -168,6 +168,7 @@ export declare const parseCellId: (id: string) => CellPos | null;
 export declare const getCellId: (c: number, r: number) => string;
 export declare const evaluateFormula: (formula: string, cells: CellMap) => string | number;
 export declare const reevaluate: (cells: CellMap) => CellMap;
+export declare const updateFormulas: (cells: CellMap, action: ActionType, index: number, count?: number) => CellMap;
 export declare const copyToClipboard: (text: string) => void;
 export declare const getEffectiveGridSize: (cells: CellMap) => {
     maxC: number;

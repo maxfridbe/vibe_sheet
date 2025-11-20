@@ -244,6 +244,14 @@ const Grid = () => {
         setContextMenu({ visible: true, x: e.clientX, y: e.clientY, type, index });
     };
 
+    const handleHeaderClick = (type: 'col' | 'row', index: number) => {
+        if (type === 'col') {
+            store.dispatch({ type: ActionType.SELECT, payload: { start: { c: index, r: 0 }, end: { c: index, r: rowCount - 1 } } });
+        } else {
+            store.dispatch({ type: ActionType.SELECT, payload: { start: { c: 0, r: index }, end: { c: colCount - 1, r: index } } });
+        }
+    };
+
     const handleCellContextMenu = (e: React.MouseEvent, c: number, r: number) => {
         e.preventDefault();
         if (!selected.start || !(c >= Math.min(selected.start.c, selected.end?.c ?? -1) && c <= Math.max(selected.start.c, selected.end?.c ?? -1) && r >= Math.min(selected.start.r, selected.end?.r ?? -1) && r <= Math.max(selected.start.r, selected.end?.r ?? -1))) {
@@ -373,134 +381,163 @@ const Grid = () => {
         };
     }
 
-    return (
-        <div ref={gridRef} className="flex-1 overflow-auto relative focus:outline-none" tabIndex={0} onKeyDown={onKeyDown}>
-             <ContextMenu 
-                {...contextMenu} 
-                onCopy={handleCopy} 
-                onCut={handleCut} 
-                onPaste={handlePaste} 
-                onAction={handleStructuralAction}
-                onClose={() => setContextMenu(prev => ({ ...prev, visible: false }))} 
-             />
-             <div className="inline-block min-w-full">
-                <table className="border-collapse w-full table-fixed">
-                    <thead>
-                        <tr>
-                            <th className="w-10 bg-gray-100 border border-gray-300 sticky top-0 left-0 z-30"></th>
-                            {Array.from({ length: colCount }).map((_, i) => (
-                                <th key={i} className={`border border-gray-300 text-gray-600 font-medium h-6 min-w-[80px] sticky top-0 z-20 resize-x overflow-hidden text-xs hover:bg-gray-200 cursor-pointer
-                                    ${selBounds && i >= selBounds.minC && i <= selBounds.maxC ? 'bg-blue-100 text-blue-700' : 'bg-gray-100'}`}
-                                    style={{ width: colWidths[i] || 80 }}
-                                    onContextMenu={(e) => handleHeaderContextMenu(e, 'col', i)}
-                                >
-                                    <div className="flex justify-center items-center w-full h-full relative group">
-                                      {getCellId(i,0).replace(/[0-9]/g, '')}
-                                      <div 
-                                        className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-blue-400"
-                                        onMouseDown={(e) => {
-                                          e.stopPropagation();
-                                          const startX = e.pageX;
-                                          const startWidth = colWidths[i] || 80;
-                                          const handleMouseMove = (moveEvent: MouseEvent) => {
-                                            const newWidth = Math.max(40, startWidth + (moveEvent.pageX - startX));
-                                            store.dispatch({ type: ActionType.RESIZE_COL, payload: { index: i, width: newWidth } });
-                                          };
-                                          const handleMouseUp = () => {
-                                            document.removeEventListener('mousemove', handleMouseMove);
-                                            document.removeEventListener('mouseup', handleMouseUp);
-                                          };
-                                          document.addEventListener('mousemove', handleMouseMove);
-                                          document.addEventListener('mouseup', handleMouseUp);
-                                        }}
-                                      />
-                                    </div>
-                                </th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {Array.from({ length: rowCount }).map((_, r) => (
-                            <tr key={r} style={{ height: rowHeights[r] || 24 }}>
-                                <td className={`border border-gray-300 text-center text-gray-500 font-medium sticky left-0 z-20 text-xs relative group hover:bg-gray-200 cursor-pointer
-                                    ${selBounds && r >= selBounds.minR && r <= selBounds.maxR ? 'bg-blue-100 text-blue-700' : 'bg-gray-100'}`}
-                                    onContextMenu={(e) => handleHeaderContextMenu(e, 'row', r)}
-                                >
-                                    <div className="flex justify-center items-center h-full pointer-events-none">
-                                        {r + 1}
-                                    </div>
-                                    <div 
-                                      className="absolute bottom-0 left-0 right-0 h-1 cursor-row-resize hover:bg-blue-400 z-30"
-                                      onMouseDown={(e) => {
-                                        e.stopPropagation();
-                                        const startY = e.pageY;
-                                        const startHeight = rowHeights[r] || 24;
-                                        const handleMouseMove = (moveEvent: MouseEvent) => {
-                                          const newHeight = Math.max(24, startHeight + (moveEvent.pageY - startY));
-                                          store.dispatch({ type: ActionType.RESIZE_ROW, payload: { index: r, height: newHeight } });
-                                        };
-                                        const handleMouseUp = () => {
-                                          document.removeEventListener('mousemove', handleMouseMove);
-                                          document.removeEventListener('mouseup', handleMouseUp);
-                                        };
-                                        document.addEventListener('mousemove', handleMouseMove);
-                                        document.addEventListener('mouseup', handleMouseUp);
-                                      }}
-                                    />
-                                </td>
-                                {Array.from({ length: colCount }).map((_, c) => {
-                                    const id = getCellId(c, r);
-                                    const cell = cells[id];
-                                    const isActive = activeCell === id;
-                                    const isSel = selBounds && c >= selBounds.minC && c <= selBounds.maxC && r >= selBounds.minR && r <= selBounds.maxR;
-                                    const s = cell?.style || {};
-                                    return (
-                                        <td key={c} data-cell-id={id}
-                                            className={`border border-gray-200 px-1 overflow-hidden whitespace-nowrap text-ellipsis cursor-cell relative ${isActive ? 'outline outline-2 outline-blue-500 z-10' : ''}`}
-                                            style={{
-                                                fontWeight: s.bold ? 'bold' : 'normal',
-                                                fontStyle: s.italic ? 'italic' : 'normal',
-                                                textDecoration: s.underline ? 'underline' : 'none',
-                                                textAlign: s.align || 'left',
-                                                backgroundColor: s.backgroundColor,
-                                                color: s.color,
-                                                borderTop: s.borderTop ? '1px solid #000' : undefined,
-                                                borderBottom: s.borderBottom ? '1px solid #000' : undefined,
-                                                borderLeft: s.borderLeft ? '1px solid #000' : undefined,
-                                                borderRight: s.borderRight ? '1px solid #000' : undefined
+            const calculateColumnWidth = (colIndex: number): number => {
+                let maxWidth = 10; // Minimum width for a column
+        
+                // Helper function to measure text width (placeholder)
+                // In a real browser environment, you would use a hidden canvas or a temporary DOM element
+                // with the appropriate font and padding styles to accurately measure text width.
+                const measureTextWidth = (text: string): number => {
+                    // This is a rough estimation. In a real app, you'd use a more accurate method.
+                    const characterWidth = 5; // rough average character width for a typical font
+                    const padding = 10; // some padding
+                    return (text.length * characterWidth) + padding;
+                };    
+            for (let r = 0; r < rowCount; r++) {
+                const cellId = getCellId(colIndex, r);
+                const cell = cells[cellId];
+                if (cell && cell.computed !== undefined && cell.computed !== null) {
+                    const text = format(cell); // Use the existing format function
+                    maxWidth = Math.max(maxWidth, measureTextWidth(text));
+                }
+            }
+            return maxWidth;
+        };
+    
+        return (
+            <div ref={gridRef} className="flex-1 overflow-auto relative focus:outline-none" tabIndex={0} onKeyDown={onKeyDown}>
+                 <ContextMenu 
+                    {...contextMenu} 
+                    onCopy={handleCopy} 
+                    onCut={handleCut} 
+                    onPaste={handlePaste} 
+                    onAction={handleStructuralAction}
+                    onClose={() => setContextMenu(prev => ({ ...prev, visible: false }))} 
+                 />
+                 <div className="inline-block min-w-full">
+                    <table className="border-collapse w-full table-fixed">
+                        <thead>
+                            <tr>
+                                <th className="w-10 bg-gray-100 border border-gray-300 sticky top-0 left-0 z-30"></th>
+                                {Array.from({ length: colCount }).map((_, i) => (
+                                    <th key={i} className={`border border-gray-300 text-gray-600 font-medium h-6 min-w-[80px] sticky top-0 z-20 resize-x overflow-hidden text-xs hover:bg-gray-200 cursor-pointer
+                                        ${selBounds && i >= selBounds.minC && i <= selBounds.maxC ? 'bg-blue-100 text-blue-700' : 'bg-gray-100'}`}
+                                        style={{ width: colWidths[i] || 80 }}
+                                        onClick={() => handleHeaderClick('col', i)}
+                                        onContextMenu={(e) => handleHeaderContextMenu(e, 'col', i)}
+                                    >
+                                        <div className="flex justify-center items-center w-full h-full relative group">
+                                          {getCellId(i,0).replace(/[0-9]/g, '')}
+                                          <div 
+                                            className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-blue-400"
+                                            onMouseDown={(e) => {
+                                              e.stopPropagation();
+                                              const startX = e.pageX;
+                                              const startWidth = colWidths[i] || 80;
+                                              const handleMouseMove = (moveEvent: MouseEvent) => {
+                                                const newWidth = Math.max(40, startWidth + (moveEvent.pageX - startX));
+                                                store.dispatch({ type: ActionType.RESIZE_COL, payload: { index: i, width: newWidth } });
+                                              };
+                                              const handleMouseUp = () => {
+                                                document.removeEventListener('mousemove', handleMouseMove);
+                                                document.removeEventListener('mouseup', handleMouseUp);
+                                              };
+                                              document.addEventListener('mousemove', handleMouseMove);
+                                              document.addEventListener('mouseup', handleMouseUp);
                                             }}
-                                            onMouseDown={(e) => onMouseDown(c, r, e)}
-                                            onMouseEnter={() => onMouseEnter(c, r)}
-                                            onContextMenu={(e) => handleCellContextMenu(e, c, r)}
-                                            onClick={() => onClick(c,r)}
-                                            onDoubleClick={() => onDoubleClick(c, r)}
-                                        >
-                                            {isSel && !isActive && <div className="absolute inset-0 bg-blue-500/20 pointer-events-none" />}
-                                            {isActive && editMode ? (
-                                                <input 
-                                                    ref={inputRef}
-                                                    className="w-full h-full outline-none bg-transparent relative z-20"
-                                                    value={editValue}
-                                                    onChange={e => setEditValue(e.target.value)}
-                                                    style={{ color: s.color }}
-                                                />
-                                            ) : (
-                                                <span className="pointer-events-none block w-full overflow-hidden text-ellipsis relative z-10">
-                                                    {format(cell)}
-                                                </span>
-                                            )}
-                                        </td>
-                                    );
-                                })}
+                                            onDoubleClick={(e) => {
+                                                e.stopPropagation();
+                                                const newWidth = calculateColumnWidth(i);
+                                                store.dispatch({ type: ActionType.RESIZE_COL, payload: { index: i, width: newWidth } });
+                                            }}
+                                          />
+                                        </div>
+                                    </th>
+                                ))}
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
-             </div>
-        </div>
-    );
-};
-
+                        </thead>
+                        <tbody>
+                            {Array.from({ length: rowCount }).map((_, r) => (
+                                <tr key={r} style={{ height: rowHeights[r] || 24 }}>
+                                    <td className={`border border-gray-300 text-center text-gray-500 font-medium sticky left-0 z-20 text-xs relative group hover:bg-gray-200 cursor-pointer
+                                        ${selBounds && r >= selBounds.minR && r <= selBounds.maxR ? 'bg-blue-100 text-blue-700' : 'bg-gray-100'}`}
+                                        onClick={() => handleHeaderClick('row', r)}
+                                        onContextMenu={(e) => handleHeaderContextMenu(e, 'row', r)}
+                                    >
+                                        <div className="flex justify-center items-center h-full pointer-events-none">
+                                            {r + 1}
+                                        </div>
+                                        <div 
+                                          className="absolute bottom-0 left-0 right-0 h-1 cursor-row-resize hover:bg-blue-400 z-30"
+                                          onMouseDown={(e) => {
+                                            e.stopPropagation();
+                                            const startY = e.pageY;
+                                            const startHeight = rowHeights[r] || 24;
+                                            const handleMouseMove = (moveEvent: MouseEvent) => {
+                                              const newHeight = Math.max(24, startHeight + (moveEvent.pageY - startY));
+                                              store.dispatch({ type: ActionType.RESIZE_ROW, payload: { index: r, height: newHeight } });
+                                            };
+                                            const handleMouseUp = () => {
+                                              document.removeEventListener('mousemove', handleMouseMove);
+                                              document.removeEventListener('mouseup', handleMouseUp);
+                                            };
+                                            document.addEventListener('mousemove', handleMouseMove);
+                                            document.addEventListener('mouseup', handleMouseUp);
+                                          }}
+                                        />
+                                    </td>
+                                    {Array.from({ length: colCount }).map((_, c) => {
+                                        const id = getCellId(c, r);
+                                        const cell = cells[id];
+                                        const isActive = activeCell === id;
+                                        const isSel = selBounds && c >= selBounds.minC && c <= selBounds.maxC && r >= selBounds.minR && r <= selBounds.maxR;
+                                        const s = cell?.style || {};
+                                        return (
+                                            <td key={c} data-cell-id={id}
+                                                className={`border border-gray-200 px-1 overflow-hidden whitespace-nowrap text-ellipsis cursor-cell relative ${isActive ? 'outline outline-2 outline-blue-500 z-10' : ''}`}
+                                                style={{
+                                                    fontWeight: s.bold ? 'bold' : 'normal',
+                                                    fontStyle: s.italic ? 'italic' : 'normal',
+                                                    textDecoration: s.underline ? 'underline' : 'none',
+                                                    textAlign: s.align || 'left',
+                                                    backgroundColor: s.backgroundColor,
+                                                    color: s.color,
+                                                    borderTop: s.borderTop ? '1px solid #000' : undefined,
+                                                    borderBottom: s.borderBottom ? '1px solid #000' : undefined,
+                                                    borderLeft: s.borderLeft ? '1px solid #000' : undefined,
+                                                    borderRight: s.borderRight ? '1px solid #000' : undefined
+                                                }}
+                                                onMouseDown={(e) => onMouseDown(c, r, e)}
+                                                onMouseEnter={() => onMouseEnter(c, r)}
+                                                onContextMenu={(e) => handleCellContextMenu(e, c, r)}
+                                                onClick={() => onClick(c,r)}
+                                                onDoubleClick={() => onDoubleClick(c, r)}
+                                            >
+                                                {isSel && !isActive && <div className="absolute inset-0 bg-blue-500/20 pointer-events-none" />}
+                                                {isActive && editMode ? (
+                                                    <input 
+                                                        ref={inputRef}
+                                                        className="w-full h-full outline-none bg-transparent relative z-20"
+                                                        value={editValue}
+                                                        onChange={e => setEditValue(e.target.value)}
+                                                        style={{ color: s.color }}
+                                                    />
+                                                ) : (
+                                                    <span className="pointer-events-none block w-full overflow-hidden text-ellipsis relative z-10">
+                                                        {format(cell)}
+                                                    </span>
+                                                )}
+                                            </td>
+                                        );
+                                    })}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                 </div>
+            </div>
+        );
+    };
 export const Spreadsheet = forwardRef<SpreadsheetRef, SpreadsheetProps>(({ id, initialData = {} }, ref) => {
     const store = useMemo(() => new SpreadsheetStore(initialData), []);
     const [activeTab, setActiveTab] = useState<'Home' | 'Data' | 'Help'>('Home');
