@@ -6,7 +6,8 @@
   "types": "dist/vibe-sheet.d.ts",
   "scripts": {
     "build": "rm -rf dist && webpack --mode production && npm run build:types && cp example/index.html dist/index.html",
-    "build:types": "tsc && cat dist/*.d.ts > dist/vibe-sheet.d.ts && find dist -name '*.d.ts' -not -name 'vibe-sheet.d.ts' -delete"
+    "build:types": "tsc && cat dist/*.d.ts > dist/vibe-sheet.d.ts && find dist -name '*.d.ts' -not -name 'vibe-sheet.d.ts' -delete",
+    "test": "ts-node tests/mortgage-calculation.test.ts"
   },
   "keywords": [],
   "author": "",
@@ -32,6 +33,7 @@
     "style-loader": "^3.3.4",
     "tailwindcss": "^3.4.1",
     "ts-loader": "^9.5.1",
+    "ts-node": "^10.9.2",
     "typescript": "^5.3.3",
     "webpack": "^5.89.0",
     "webpack-cli": "^5.1.4"

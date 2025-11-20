@@ -456,8 +456,7 @@ const Grid = () => {
                                     const s = cell?.style || {};
                                     return (
                                         <td key={c} data-cell-id={id}
-                                            className={`border border-gray-200 px-1 overflow-hidden whitespace-nowrap text-ellipsis cursor-cell relative bg-white
-                                                ${isActive ? 'outline outline-2 outline-blue-500 z-10' : ''}`}
+                                            className={`border border-gray-200 px-1 overflow-hidden whitespace-nowrap text-ellipsis cursor-cell relative ${isActive ? 'outline outline-2 outline-blue-500 z-10' : ''}`}
                                             style={{
                                                 fontWeight: s.bold ? 'bold' : 'normal',
                                                 fontStyle: s.italic ? 'italic' : 'normal',

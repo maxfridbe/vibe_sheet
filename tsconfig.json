@@ -22,5 +22,10 @@
   },
   "include": [
     "vibesheet/**/*"
-  ]
+  ],
+  "ts-node": {
+    "compilerOptions": {
+      "module": "CommonJS"
+    }
+  }
 }

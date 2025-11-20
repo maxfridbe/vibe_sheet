@@ -12,6 +12,7 @@ export const evaluateFormula = (formula: string, cells: CellMap): string | numbe
   try {
     const getVal = (id: string) => { const v = cells[id]?.computed ?? cells[id]?.value ?? 0; return isNaN(Number(v)) ? 0 : Number(v); };
     const expr = formula.substring(1).toUpperCase()
+      .replace(/\^/g, '**')
       .replace(/(\$?[A-Z]+\$?[0-9]+):(\$?[A-Z]+\$?[0-9]+)/g, (_, s, e) => {
         const p1 = parseCellId(s.replace(/\$/g, '')), p2 = parseCellId(e.replace(/\$/g, ''));
         if (!p1 || !p2) return "[]";
@@ -28,8 +29,12 @@ export const evaluateFormula = (formula: string, cells: CellMap): string | numbe
 };
 
 export const reevaluate = (cells: CellMap): CellMap => {
-  const next = { ...cells };
-  for (let i = 0; i < 2; i++) {
+  const next: CellMap = {};
+  Object.keys(cells).forEach(k => {
+      next[k] = { ...cells[k] };
+  });
+
+  for (let i = 0; i < 5; i++) {
     Object.keys(next).forEach(k => {
       const c = next[k];
       if (c.value === "" || c.value === null) c.computed = "";
